@@ -1,0 +1,40 @@
+{
+  "name": "bridge-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.1.1",
+    "@mui/material": "^9.1.2",
+    "@rainbow-me/rainbowkit": "2.1.2",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@tanstack/react-query": "5.40.0",
+    "@tanstack/react-virtual": "^3.14.5",
+    "ethers": "^6.16.0",
+    "next": "14.2.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "styled-components": "6.1.11",
+    "three": "^0.185.0",
+    "viem": "2.13.1",
+    "wagmi": "2.9.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
