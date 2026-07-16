@@ -81,7 +81,7 @@ export interface OkxSetupRequest {
     walletLane: "okx";
 }
 
-export interface FaucetClaim {
+export interface FaucetClaim1 {
     owner: `0x${string}`;
 
     lane?: string;
@@ -150,4 +150,28 @@ export interface PersonalClaimResponse {
     chainId?: number;
     amountWei?: string;
     txHash?: string;
+}
+
+export interface FaucetClaim {
+    amount: string;
+
+    amountWei: string;
+
+    status: "Success";
+
+    claimedAt: string;
+
+    txHash: string;
+
+    chainId: number;
+
+    owner: string;
+
+    lane: "okx" | "personal";
+}
+
+export interface FaucetClaimsResponse {
+    faucet: boolean;
+
+    claims: FaucetClaim[];
 }

@@ -7,52 +7,77 @@ import FaucetCard from "./components/FaucetCard";
 import RecentClaimsTable from "./components/RecentClaimsTable";
 
 import {
+    fetchClaims,
     useClaimStatus,
     useFaucet,
     useFaucetHistory,
     usePrefetchOkx,
+    useRecentClaims,
 } from "@/hooks/faucet";
 import { formatAmount, formatDate } from "@/helpers";
 import { useActiveChainCurrency } from "@/chains/utils";
 import { qantera } from "@/chains";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { FAUCET_QUERY_KEYS } from "@/constants/faucet";
+
+interface RecentClaimItem {
+    amount: string;
+    faucet: boolean;
+    date: string;
+    tx: string;
+}
 
 export default function FaucetView() {
+    usePrefetchOkx()
     const { address, isConnected, chainId } = useAccount();
-    const { switchChainAsync } = useSwitchChain();
 
-    const isWrongNetwork = chainId !== qantera.id;
+    const { switchChainAsync } = useSwitchChain();
 
     const { openConnectModal } = useConnectModal();
 
-    usePrefetchOkx()
-
     const faucet = useFaucet();
-    const { data: balanceData, isLoading: isBalanceLoading, refetch: refetchBalance } = useBalance({address: address});
 
-    const currentBalance = isConnected && balanceData
-        ? parseFloat(balanceData.formatted).toFixed(2)
-        : "0.00";
+    const {
+        data: balanceData,
+        refetch: refetchBalance,
+    } = useBalance({
+        address,
+    });
 
-    const history = useFaucetHistory(address);
+    const currentBalance =
+        isConnected && balanceData
+            ? parseFloat(balanceData.formatted).toFixed(2)
+            : "0.00";
 
-    const claimStatus = useClaimStatus({ address });
+    const claimStatus = useClaimStatus({
+        address,
+    });
 
-    const { symbol } = useActiveChainCurrency();
+    const LIMIT = 5;
 
-    const recentClaims = history.map(
-        (item) => ({
-            amount: `${item.amountWei} ${symbol}`,
-            faucet: item.faucet,
-            date: formatDate(
-                item.createdAt
-            ),
-            // tx: shortenHash(
-            //     item.txHash
-            // ),
-            tx: item.txHash,
-        })
-    );
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetching,
+        isFetchingNextPage,
+    } = useRecentClaims({
+        limit: LIMIT,
+        polling: 60_000,
+    });
+
+    const recentClaims: RecentClaimItem[] =
+        data?.pages.flatMap((page) =>
+            page.claims.map((item) => ({
+                amount: `${item.amount}`,
+                faucet: true,
+                date: formatDate(new Date(item.claimedAt).getTime()),
+                tx: item.txHash,
+            }))
+        ) ?? [];
+
+    const isWrongNetwork = chainId !== qantera.id;
 
     const handleClaim = async () => {
         if (!isConnected) {
@@ -62,10 +87,14 @@ export default function FaucetView() {
 
         try {
             if (isWrongNetwork) {
-                await switchChainAsync({ chainId: qantera.id });
+                await switchChainAsync({
+                    chainId: qantera.id,
+                });
             }
+
             await faucet.claim();
-            refetchBalance()
+
+            refetchBalance();
         } catch (error) {
             console.error(error);
         }
@@ -100,7 +129,6 @@ export default function FaucetView() {
                 connected={isConnected}
                 address={address}
                 networkName="Qantera Testnet"
-                claimAmount="1"
                 currentBalance={currentBalance}
                 loading={faucet.isPending}
                 claimed={claimStatus.claimed}
@@ -109,7 +137,16 @@ export default function FaucetView() {
                 onConnect={() => openConnectModal?.()}
             />
 
-            <RecentClaimsTable data={recentClaims} />
+            <RecentClaimsTable
+                data={recentClaims}
+                hasMore={!!hasNextPage}
+                loading={isFetching && !data}
+                onLoadMore={() => {
+                    if (!isFetchingNextPage && hasNextPage) {
+                        fetchNextPage();
+                    }
+                }}
+            />
         </Box>
     );
 }

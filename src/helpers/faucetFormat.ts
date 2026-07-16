@@ -8,7 +8,7 @@ export function formatAmount(
     ).toFixed(2)}`;
 }
 
-export function formatDate(
+export function formatDate1(
     timestamp: number
 ) {
     return new Intl.DateTimeFormat(
@@ -18,10 +18,23 @@ export function formatDate(
             day: "numeric",
             year: "numeric",
         }
-    ).format(
-        new Date(timestamp)
-    );
+    ).format(new Date(timestamp));
 }
+
+export const formatDate = (value: string | number | Date) => {
+    const date = new Date(value);
+
+    return new Intl.DateTimeFormat(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        }
+    ).format(
+        new Date(value)
+    );
+};
 
 export function shortenHash(
     hash: string

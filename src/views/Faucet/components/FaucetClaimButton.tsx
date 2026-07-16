@@ -12,7 +12,7 @@ interface Props {
 
     claimedAt?: string;
 
-    claimAmount: string;
+    claimAmount?: string | number;
 
     symbol: string;
 
@@ -60,11 +60,12 @@ export default function FaucetClaimButton({
             return claimInfo.remainText;
         }
 
-        return `Claim ${symbol}`;
+        return `Claim ${claimAmount} ${symbol}`;
     }, [
         loading,
         claimInfo.disabled,
         claimInfo.remainText,
+        claimAmount,
         symbol,
     ]);
 

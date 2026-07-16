@@ -8,3 +8,4 @@ export * from "./usePrefetchOkx";
 export * from "./useWalletType";
 export * from "./useFaucetHistory";
 export * from "./useClaimStatus";
+export * from "./useRecentClaims";

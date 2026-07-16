@@ -2,6 +2,7 @@ import {
     Chip,
     Link,
     Paper,
+    Skeleton,
     Stack,
     Table,
     TableBody,
@@ -14,6 +15,7 @@ import {
 import { RECENT_CLAIMS } from "../constants";
 import FaucetStatusChip from "./FaucetStatusChip";
 import { shortenHash } from "@/helpers";
+import { useEffect, useRef } from "react";
 
 interface RecentClaimItem {
     amount: string;
@@ -24,11 +26,39 @@ interface RecentClaimItem {
 
 interface Props {
     data: RecentClaimItem[];
+    hasMore: boolean;
+    loading: boolean;
+    onLoadMore: () => void;
 }
-
 export default function RecentClaimsTable({
     data,
+    hasMore,
+    loading,
+    onLoadMore,
 }: Props) {
+
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const container = containerRef.current;
+
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+
+            const reachedBottom = scrollTop + clientHeight >= scrollHeight - 100;
+
+            if (reachedBottom && hasMore && !loading) {
+                onLoadMore();
+            }
+        };
+
+        container.addEventListener("scroll", handleScroll);
+
+        return () => container.removeEventListener("scroll", handleScroll);
+    }, [hasMore, loading, onLoadMore]);
+
     return (
         <>
             <Stack sx={{ width: "100%" }}>
@@ -47,6 +77,7 @@ export default function RecentClaimsTable({
             </Stack>
 
             <TableContainer
+                ref={containerRef}
                 component={Paper}
                 elevation={0}
                 sx={{
@@ -54,21 +85,35 @@ export default function RecentClaimsTable({
                     border: "1px solid #DEE1E6",
                     width: "100%",
                     backgroundColor: "#FFFFFF",
-                    overflow: "hidden",
+
+                    maxHeight: 300,
+                    overflowY: "auto",
+
                     overflowX: "auto",
+
                     "&::-webkit-scrollbar": {
-                        height: "3px",
+                        width: "4px",
+                        height: "4px",
                     },
+
                     "&::-webkit-scrollbar-track": {
-                        backgroundColor: "transparent",
-                        mx: 2,
+                        background: "transparent",
+                        margin: "15px 0",
                     },
+
                     "&::-webkit-scrollbar-thumb": {
-                        backgroundColor: "#DEE1E6",
-                        borderRadius: "100px",
+                        backgroundColor: "#D3D8DF",
+                        borderRadius: "999px",
+                        minHeight: "40px",
+                        transition: "background-color .2s ease",
+
                         "&:hover": {
-                            backgroundColor: "#B0B5BC",
+                            backgroundColor: "#B9C0C8",
                         },
+                    },
+
+                    "&::-webkit-scrollbar-corner": {
+                        background: "transparent",
                     },
                 }}
             >
@@ -122,7 +167,7 @@ export default function RecentClaimsTable({
                     </TableHead>
 
                     <TableBody>
-                        {data.length === 0 ? (
+                        {data === undefined ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={4}
@@ -134,6 +179,52 @@ export default function RecentClaimsTable({
                                     }}
                                 >
                                     No recent transaction
+                                </TableCell>
+                            </TableRow>
+                        ) : loading ? (
+                            <TableRow>
+                                <TableCell
+                                    sx={{
+                                        py: 2,
+                                    }}
+                                >
+                                    <Skeleton
+                                        variant="text"
+                                        width={120}
+                                        height={32}
+                                    />
+                                </TableCell>
+
+                                <TableCell sx={{ py: 2 }}>
+                                    <Skeleton
+                                        variant="rounded"
+                                        width={80}
+                                        height={28}
+                                    />
+                                </TableCell>
+
+                                <TableCell
+                                    sx={{
+                                        py: 2,
+                                    }}
+                                >
+                                    <Skeleton
+                                        variant="text"
+                                        width={140}
+                                        height={24}
+                                    />
+                                </TableCell>
+
+                                <TableCell
+                                    sx={{
+                                        py: 2,
+                                    }}
+                                >
+                                    <Skeleton
+                                        variant="text"
+                                        width={110}
+                                        height={24}
+                                    />
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -181,7 +272,11 @@ export default function RecentClaimsTable({
                                             py: 2,
                                         }}
                                     >
-                                        <Link href={`https://explorer.qantera.network/tx/${row.tx}`} target="_blank" rel="noopener noreferrer">
+                                        <Link
+                                            href={`https://explorer.qantera.network/tx/${row.tx}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
                                             {shortenHash(row.tx)}
                                         </Link>
                                     </TableCell>

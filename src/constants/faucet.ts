@@ -4,6 +4,8 @@ export const FAUCET_API_BASE =
 export const FAUCET_ENDPOINTS = {
     CONFIG: "/api/config",
 
+    CLAIMS: "/v2/faucet/claims",
+
     PERSONAL: {
         PREPARE: "/v2/faucet/personal/prepare",
         CLAIM: "/v2/faucet/personal/claim",
@@ -24,6 +26,8 @@ export const FAUCET_ENDPOINTS = {
 export const FAUCET_QUERY_KEYS = {
     CONFIG: ["faucet", "config"] as const,
 
+    CLAIMS: ["faucet-claims"],
+
     PREFETCH: {
         OKX: (address: string) =>
             ["faucet", "prefetch", "okx", address] as const,
@@ -37,6 +41,12 @@ export const FAUCET_QUERY_KEYS = {
             ["faucet", "status", "okx", address] as const,
     },
 } as const;
+
+export const FAUCET_DEFAULT_LIMIT = 50;
+
+export const FAUCET_MAX_LIMIT = 200;
+
+export const FAUCET_POLLING_INTERVAL = 30_000;
 
 export const FAUCET_CACHE = {
     CONFIG_STALE: Infinity,

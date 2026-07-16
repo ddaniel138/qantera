@@ -17,6 +17,8 @@ import ConnectWalletButton from "@/components/ConnectWalletButton";
 import ConnectWalletModal from "@/components/modal/ConnectWalletModal";
 import { useActiveChainCurrency } from "@/chains";
 import FaucetClaimButton from "./FaucetClaimButton";
+import { useWalletType } from "@/hooks/faucet";
+import { WalletType } from "@/constants/faucet";
 
 interface Props {
     connected: boolean;
@@ -26,8 +28,6 @@ interface Props {
     networkName: string;
 
     currentBalance: string;
-
-    claimAmount: string;
 
     loading: boolean;
 
@@ -51,7 +51,6 @@ export default function FaucetCard({
     address,
     networkName,
     currentBalance,
-    claimAmount,
     loading,
     claimed,
     claimedAt,
@@ -79,6 +78,10 @@ export default function FaucetCard({
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { name, symbol } = useActiveChainCurrency();
+
+    const walletType = useWalletType();
+
+    const ClaimAmount = walletType === WalletType.OKX ? 3 : 1
 
     return (
         <Paper
@@ -228,7 +231,7 @@ export default function FaucetCard({
                             fontFamily: "var(--font-jetBrain-mono)",
                         }}
                     >
-                        {claimAmount} {symbol}
+                        {ClaimAmount} {symbol}
                     </Typography>
                 </Box>
             </GridContainer>
@@ -238,7 +241,7 @@ export default function FaucetCard({
                     loading={loading}
                     claimed={claimed}
                     claimedAt={claimedAt}
-                    claimAmount={claimAmount}
+                    claimAmount={ClaimAmount}
                     symbol={symbol}
                     onClick={onClaim}
                 />
